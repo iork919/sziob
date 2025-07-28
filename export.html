@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Экспорт видео из VK</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 8px;
+      text-align: left;
+    }
+    iframe {
+      width: 320px;
+      height: 180px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Список видео из VK</h1>
+  <p>Скопируй нужные строки в Excel. Категорию добавь вручную.</p>
+  <table id="video-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Плеер</th>
+        <th>Название</th>
+        <th>Дата публикации</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const TOKEN = "vk1.a.pDIybt3bp8hKme4TNZEF05lusI82KCMAg9u_ZM-qJVhlSNWGLFnuh6IHKY1aqaiLWiuLIO2RZe5LaaQdlVMEpnYSYuYWjehcKgyTqVYDj-GUELYFeBj-UQy-pz8GEgL6FzljHKkZuR_GBi9mKnlD-S2WG8JsZOU18S9N_2-9ZItxt_-LSlSAKRhTsKD9zrfU_20Yl5rBtpQWktmeU81Yew";
+    const OWNER_ID = -171594852;
+
+    fetch(`https://api.vk.com/method/video.get?owner_id=${OWNER_ID}&access_token=${TOKEN}&v=5.131&count=100`)
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.querySelector("#video-table tbody");
+        data.response.items.forEach((video, index) => {
+          const tr = document.createElement("tr");
+
+          const videoSrc = `https://vk.com/video_ext.php?oid=${video.owner_id}&id=${video.id}&hash=${video.access_key}`;
+          const date = new Date(video.date * 1000).toLocaleDateString();
+
+          tr.innerHTML = `
+            <td>${index + 1}</td>
+            <td><iframe src="${videoSrc}" frameborder="0" allowfullscreen></iframe></td>
+            <td>${video.title}</td>
+            <td>${date}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      })
+      .catch(err => {
+        document.body.innerHTML = "<p>Ошибка загрузки видео. Проверь токен.</p>";
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
